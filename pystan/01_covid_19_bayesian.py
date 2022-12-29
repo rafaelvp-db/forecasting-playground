@@ -1,8 +1,12 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC For the predictive analytics of coronavirus spread, we used a logistic curve model. This model can be written as follows:
-# MAGIC <center><img src="https://media-exp1.licdn.com/dms/image/C4D12AQGQDAsbKlUy9A/article-inline_image-shrink_1000_1488/0?e=1591228800&v=beta&t=rmELRsMhGY7-YEVAkIOFpqoRHztjU4TZgfVOGvFKaA0" width="300px"></center>
-# MAGIC where Date0 is a start day for observations in the historical data set, it is measured in weeks. Coefficient alpha denotes maximum cases of coronavirus, coefficient beta is an empirical coefficient which denotes the rate of coronavirus spreading. Bayesian inference makes it possible to obtain probability density functions for model parameters and estimate the uncertainty that is important in the risk assessment analytics. In Bayesian regression approach, we can take into account expert opinions via information prior distribution. For Bayesian inference calculations, we used python pystan package. New historical data will correct the distributions for model parameters and forecasting results. In the practical analytics, it is important to find the maximum of coronavirus cases per day, this point means  estimated half time of coronavirus spread in the region under investigation. More details of our study are [here](http://www.linkedin.com/pulse/using-logistic-curve-bayesian-inference-modeling-bohdan-pavlyshenko/).
+# MAGIC * For the predictive analytics of coronavirus spread, we used a logistic curve model.
+# MAGIC * Bayesian inference makes it possible to obtain probability density functions for model parameters and estimate the uncertainty that is important in the risk assessment analytics.
+# MAGIC * In Bayesian regression approach, we can take into account expert opinions via information prior distribution. For Bayesian inference calculations, we used python pystan package.
+# MAGIC * New historical data will correct the distributions for model parameters and forecasting results.
+# MAGIC * In the practical analytics, it is important to find the maximum of coronavirus cases per day, this point means estimated half time of coronavirus spread in the region under investigation.
+# MAGIC 
+# MAGIC More details of our study are [here](http://www.linkedin.com/pulse/using-logistic-curve-bayesian-inference-modeling-bohdan-pavlyshenko/).
 
 # COMMAND ----------
 
@@ -19,7 +23,7 @@ sns.set()
 # Set up options 
 
 # File name of historical data file
-data_filename='/kaggle/input/covid19-global-forecasting-week-2/train.csv'
+data_filename='/dbfs/kaggle/input/covid19-global-forecasting-week-2/train.csv'
 
 # Name of fields in the hystorical data frame for in the following order: 
 # date, region, confirmed cases, fatalities
