@@ -10,6 +10,10 @@
 
 # COMMAND ----------
 
+!unzip /dbfs/FileStore/rafael.pierre/covid19_global_forecasting_week_2.zip
+
+# COMMAND ----------
+
 import pystan
 import pandas as pd
 import numpy as np
@@ -23,7 +27,7 @@ sns.set()
 # Set up options 
 
 # File name of historical data file
-data_filename='/dbfs/kaggle/input/covid19-global-forecasting-week-2/train.csv'
+data_filename='/dbfs/FileStore/rafael.pierre/covid/train.csv'
 
 # Name of fields in the hystorical data frame for in the following order: 
 # date, region, confirmed cases, fatalities
@@ -148,6 +152,10 @@ stan_model= pystan.StanModel(model_code=model_logistic)
 
 # MAGIC %md
 # MAGIC ### Read data
+
+# COMMAND ----------
+
+!unzip /dbfs/FileStore/rafael.pierre/covid19_global_forecasting_week_2.zip -d /dbfs/FileStore/rafael.pierre/covid
 
 # COMMAND ----------
 
