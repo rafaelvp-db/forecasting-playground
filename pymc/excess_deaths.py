@@ -1,17 +1,11 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC (excess_deaths)=
-# MAGIC # Counterfactual inference: calculating excess deaths due to COVID-19
 # MAGIC 
-# MAGIC :::{post} July, 2022
-# MAGIC :tags: counterfactuals, causal inference, time series, case study, Bayesian workflow, forecasting, causal impact, regression, posterior predictive
-# MAGIC :category: intermediate
-# MAGIC :author: Benjamin T. Vincent
-# MAGIC :::
+# MAGIC # Counterfactual inference: calculating excess deaths due to COVID-19
 # MAGIC 
 # MAGIC Causal reasoning and counterfactual thinking are really interesting but complex topics! Nevertheless, we can make headway into understanding the ideas through relatively simple examples. This notebook focuses on the concepts and the practical implementation of Bayesian causal reasoning using PyMC.
 # MAGIC 
-# MAGIC We do this using the sobering but important example of calculating excess deaths due to COVID-19. As such, the ideas in this notebook strongly overlap with Google's [CausalImpact](https://google.github.io/CausalImpact/CausalImpact.html) (see {cite:t}`google_causal_impact2015`). Practically, we will try to estimate the number of 'excess deaths' since the onset of COVID-19, using data from England and Wales. Excess deaths are defined as:
+# MAGIC We do this using the sobering but important example of calculating excess deaths due to COVID-19. As such, the ideas in this notebook strongly overlap with Google's [CausalImpact](https://google.github.io/CausalImpact/CausalImpact.html). Practically, we will try to estimate the number of 'excess deaths' since the onset of COVID-19, using data from England and Wales. Excess deaths are defined as:
 # MAGIC 
 # MAGIC $$
 # MAGIC \text{Excess deaths} = 
