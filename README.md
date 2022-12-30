@@ -9,6 +9,12 @@
 * [Prophet](https://facebook.github.io/prophet/)
 * [Time Series Transformer](https://huggingface.co/docs/transformers/model_doc/time_series_transformer)
 
+### Instructions
+
+* Clone this repo into your Databricks Workspace
+* Create a cluster with Machine Learning Runtime version 12.0
+* Run the example notebooks
+
 ### Datasets Used
 
 * [COVID-19](https://www.kaggle.com/datasets/imdevskp/corona-virus-report)
