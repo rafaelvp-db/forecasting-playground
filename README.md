@@ -1,6 +1,6 @@
 ## Forecasting Playground
 
-**TLDR;** multiple examples of basic forecasting modelling in Databricks
+**TLDR;** multiple examples of basic time series forecasting notebooks for Databricks
 
 ### Tools & Frameworks
 
