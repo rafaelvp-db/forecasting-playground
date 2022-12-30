@@ -1,6 +1,6 @@
 ## Forecasting Playground
 
-**TLDR;** multiple examples of basic time series forecasting notebooks for [Databricks](https://www.databricks.com)
+**TLDR;** multiple examples of causal and probabilistic time series forecasting notebooks for [Databricks](https://www.databricks.com)
 
 ### Example: PyMC
 
