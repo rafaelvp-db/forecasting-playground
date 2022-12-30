@@ -24,6 +24,7 @@
 * [COVID-19](https://www.kaggle.com/datasets/imdevskp/corona-virus-report)
 * [NFL Big Data Bowl](https://www.kaggle.com/c/nfl-big-data-bowl-2022)
 * [COVID-19 Deaths Registered Monthly in England and Wales](https://github.com/pymc-devs/pymc-examples/blob/2022.12.0/examples/data/deaths_and_temps_england_wales.csv)
+* [Monash Time Series Forecasting Dataset](https://huggingface.co/datasets/monash_tsf)
 
 ### Reference
 
