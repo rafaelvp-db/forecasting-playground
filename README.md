@@ -13,9 +13,11 @@
 
 * [COVID-19](https://www.kaggle.com/datasets/imdevskp/corona-virus-report)
 * [NFL Big Data Bowl](https://www.kaggle.com/c/nfl-big-data-bowl-2022)
+* [COVID-19 Deaths Registered Monthly in England and Wales](https://github.com/pymc-devs/pymc-examples/blob/2022.12.0/examples/data/deaths_and_temps_england_wales.csv)
 
 ### Reference
 
 * [Bayesian Model for COVID-19](https://www.kaggle.com/code/bpavlyshenko/bayesian-model-for-covid-19-spread-prediction/log)
 * [Hierarchical Bayesian Modeling using PyStan](https://www.kaggle.com/code/kyonaganuma/hierarchical-bayesian-modeling-using-pystan)
 * [Probabilistic Time Series Forecasting with Transformers](https://huggingface.co/blog/time-series-transformers)
+* [Counterfactual inference: calculating excess deaths due to COVID-19](https://github.com/pymc-devs/pymc-examples/blob/2022.12.0/examples/causal_inference/excess_deaths.ipynb)
