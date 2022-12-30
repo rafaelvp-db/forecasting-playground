@@ -10,8 +10,8 @@
 
 * [PyStan](https://pystan.readthedocs.io/en/latest/)
 * [PyMC](https://www.pymc.io/welcome.html)
-* [Prophet](https://facebook.github.io/prophet/)
-* [Time Series Transformer](https://huggingface.co/docs/transformers/model_doc/time_series_transformer)
+* [Facebook Prophet](https://facebook.github.io/prophet/)
+* [Hugging Face Time Series Transformer](https://huggingface.co/docs/transformers/model_doc/time_series_transformer)
 
 ### Instructions
 
