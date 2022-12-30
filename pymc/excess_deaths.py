@@ -50,11 +50,17 @@
 
 # MAGIC %sh
 # MAGIC 
-# MAGIC sudo apt-get install graphviz graphviz-dev -y
+# MAGIC sudo apt-get -q update -y && sudo apt-get -q upgrade -y
 
 # COMMAND ----------
 
-!pip install -q --upgrade pip && pip install pytensor colorcet stats arviz pymc xarray pygraphviz   
+# MAGIC %sh
+# MAGIC 
+# MAGIC sudo apt-get -q install graphviz graphviz-dev -y
+
+# COMMAND ----------
+
+!pip install -q --upgrade pip && pip install graphviz pygraphviz
 
 # COMMAND ----------
 
@@ -292,14 +298,17 @@ with pm.Model(coords={"month": month_strings}) as model:
 
 # COMMAND ----------
 
-!pip install graphviz
+import pygraphviz as pgv
+from PIL import Image
 
-# COMMAND ----------
+A = pm.model_to_graphviz(model)
+A.render("model.dot")  # write to model.dot
+B = pgv.AGraph("model.dot")  # create a new graph from file
+B.layout("dot")  # layout with dot
+B.draw("model.png")  # draw png
+im = Image.open("model.png")
 
-from IPython import display as d
-
-gv_body = pm.model_to_graphviz(model)
-gv_body.render(view = True)
+display(im)
 
 # COMMAND ----------
 
@@ -533,30 +542,5 @@ ax[1].set(title="Cumulative excess deaths, since COVID-19 onset");
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## References
-# MAGIC 
-# MAGIC :::{bibliography}
-# MAGIC :filter: docname in docnames
-# MAGIC :::
-
-# COMMAND ----------
-
-# MAGIC %md
 # MAGIC ## Authors
 # MAGIC - Authored by [Benjamin T. Vincent](https://github.com/drbenvincent) in July 2022.
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ## Watermark
-
-# COMMAND ----------
-
-# MAGIC %load_ext watermark
-# MAGIC %watermark -n -u -v -iv -w -p aesara,aeppl,xarray
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC :::{include} ../page_footer.md
-# MAGIC :::
