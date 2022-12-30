@@ -1,0 +1,7 @@
+pandas
+transformers
+datasets
+evaluate
+accelerate
+gluonts
+ujson
