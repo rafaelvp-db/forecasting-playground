@@ -2,6 +2,10 @@
 
 **TLDR;** multiple examples of basic time series forecasting notebooks for Databricks
 
+#### Example: PyMC
+
+<img src="https://github.com/rafaelvp-db/forecasting-playground/raw/master/img/posterior_covid.png" />
+
 ### Tools & Frameworks
 
 * [PyStan](https://pystan.readthedocs.io/en/latest/)
