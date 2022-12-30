@@ -1,0 +1,58 @@
+digraph {
+	subgraph "clustert (168)" {
+		deaths [label="deaths
+~
+MutableData" shape=box style="rounded, filled"]
+		mu [label="mu
+~
+Deterministic" shape=box]
+		temp [label="temp
+~
+MutableData" shape=box style="rounded, filled"]
+		obs [label="obs
+~
+TruncatedNormal" shape=ellipse style=filled]
+		month [label="month
+~
+MutableData" shape=box style="rounded, filled"]
+		time [label="time
+~
+MutableData" shape=box style="rounded, filled"]
+		label="t (168)" labeljust=r labelloc=b style=rounded
+	}
+	"linear trend" [label="linear trend
+~
+TruncatedNormal" shape=ellipse]
+	sigma [label="sigma
+~
+HalfNormal" shape=ellipse]
+	intercept [label="intercept
+~
+Normal" shape=ellipse]
+	"temp coeff" [label="temp coeff
+~
+Normal" shape=ellipse]
+	subgraph "clustermonth_reduced (11)" {
+		"month mu_raw" [label="month mu_raw
+~
+Normal" shape=ellipse]
+		label="month_reduced (11)" labeljust=r labelloc=b style=rounded
+	}
+	subgraph "clustermonth (12)" {
+		"month mu" [label="month mu
+~
+Deterministic" shape=box]
+		label="month (12)" labeljust=r labelloc=b style=rounded
+	}
+	obs -> deaths
+	"month mu_raw" -> "month mu"
+	temp -> mu
+	"temp coeff" -> mu
+	"linear trend" -> mu
+	intercept -> mu
+	month -> mu
+	time -> mu
+	"month mu" -> mu
+	sigma -> obs
+	mu -> obs
+}

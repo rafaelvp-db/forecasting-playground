@@ -7,11 +7,8 @@
 # MAGIC 
 # MAGIC We do this using the sobering but important example of calculating excess deaths due to COVID-19. As such, the ideas in this notebook strongly overlap with Google's [CausalImpact](https://google.github.io/CausalImpact/CausalImpact.html). Practically, we will try to estimate the number of 'excess deaths' since the onset of COVID-19, using data from England and Wales. Excess deaths are defined as:
 # MAGIC 
-# MAGIC $$
-# MAGIC \text{Excess deaths} = 
-# MAGIC   \underbrace{\text{Reported Deaths}}_{\text{noisy measure of actual deaths}} 
-# MAGIC   - \underbrace{\text{Expected Deaths}}_{\text{unmeasurable counterfactual}}
-# MAGIC $$
+# MAGIC <br/>
+# MAGIC <img src="https://raw.githubusercontent.com/rafaelvp-db/forecasting-playground/master/img/excess_deaths.png" width="400px"/>
 # MAGIC 
 # MAGIC Making a claim about excess deaths requires causal/counterfactual reasoning. While the reported number of deaths is nothing but a (maybe noisy and/or lagged) measure of a real observable fact in the world, _expected deaths_ is unmeasurable because these are never realised in our timeline. That is, the expected deaths is a counterfactual thought experiment where we can ask "What would/will happen if?"
 
@@ -51,10 +48,20 @@
 
 # COMMAND ----------
 
+# MAGIC %sh
+# MAGIC 
+# MAGIC sudo apt-get install graphviz graphviz-dev -y
+
+# COMMAND ----------
+
+!pip install -q --upgrade pip && pip install pytensor colorcet stats arviz pymc xarray pygraphviz   
+
+# COMMAND ----------
+
 import calendar
 import os
 
-import aesara.tensor as at
+import pytensor.tensor as pt
 import arviz as az
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
@@ -93,9 +100,9 @@ def ZeroSumNormal(name, *, sigma=None, active_dims=None, dims, model=None):
     def extend_axis(value, axis):
         n_out = value.shape[axis] + 1
         sum_vals = value.sum(axis, keepdims=True)
-        norm = sum_vals / (at.sqrt(n_out) + n_out)
-        fill_val = norm - sum_vals / at.sqrt(n_out)
-        out = at.concatenate([value, fill_val], axis=axis)
+        norm = sum_vals / (pt.sqrt(n_out) + n_out)
+        fill_val = norm - sum_vals / pt.sqrt(n_out)
+        out = pt.concatenate([value, fill_val], axis=axis)
         return out - norm
 
     dims_reduced = []
@@ -165,10 +172,8 @@ month_strings = calendar.month_name[1:]
 
 # COMMAND ----------
 
-try:
-    df = pd.read_csv(os.path.join("..", "data", "deaths_and_temps_england_wales.csv"))
-except FileNotFoundError:
-    df = pd.read_csv(pm.get_data("deaths_and_temps_england_wales.csv"))
+dataset_url = "https://github.com/pymc-devs/pymc-examples/raw/2022.12.0/examples/data/deaths_and_temps_england_wales.csv"
+df = pd.read_csv(dataset_url)
 
 df["date"] = pd.to_datetime(df["date"])
 df = df.set_index("date")
@@ -250,7 +255,7 @@ print(f"{slope:.0f} deaths/degree")
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC Based on this, if we focus only on the relationship between temperature and deaths, we expect there to be 764 _fewer_ deaths for every $1^\circ C$ increase in average monthly temperature. So we can use this figure when it comes to defining a prior over the coefficient for the temperature effect.
+# MAGIC Based on this, if we focus only on the relationship between temperature and deaths, we expect there to be 764 _fewer_ deaths for every **1 degree Celsius** increase in average monthly temperature. So we can use this figure when it comes to defining a prior over the coefficient for the temperature effect.
 
 # COMMAND ----------
 
@@ -287,7 +292,14 @@ with pm.Model(coords={"month": month_strings}) as model:
 
 # COMMAND ----------
 
-pm.model_to_graphviz(model)
+!pip install graphviz
+
+# COMMAND ----------
+
+from IPython import display as d
+
+gv_body = pm.model_to_graphviz(model)
+gv_body.render(view = True)
 
 # COMMAND ----------
 
