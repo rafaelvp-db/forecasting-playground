@@ -1,19 +1,23 @@
 # Databricks notebook source
+!pip install -q --upgrade pip && pip install -q --upgrade transformers datasets evaluate accelerate gluonts ujson
 
 # COMMAND ----------
 
 from datasets import load_dataset
 
 dataset = load_dataset("monash_tsf", "tourism_monthly")
+train_example = dataset["train"][0]
+validation_example = dataset["validation"][0]
+train_example.keys()
 
-# COMMAND -----------
+# COMMAND ----------
 
 freq = "1M"
 prediction_length = 24
 
 assert len(train_example['target']) + prediction_length == len(validation_example['target'])
 
-# COMMAND -----------
+# COMMAND ----------
 
 import matplotlib.pyplot as plt
 
@@ -23,12 +27,12 @@ axes.plot(validation_example['target'], color="red", alpha=0.5)
 
 plt.show()
 
-# COMMAND -----------
+# COMMAND ----------
 
 train_dataset = dataset["train"]
 test_dataset = dataset["test"]
 
-# COMMAND -----------
+# COMMAND ----------
 
 from functools import lru_cache
 
@@ -43,28 +47,28 @@ def transform_start_field(batch, freq):
     batch["start"] = [convert_to_pandas_period(date, freq) for date in batch["start"]]
     return batch
 
-# COMMAND -----------
+# COMMAND ----------
 
 from functools import partial
 
 train_dataset.set_transform(partial(transform_start_field, freq=freq))
 test_dataset.set_transform(partial(transform_start_field, freq=freq))
 
-# COMMAND -----------
+# COMMAND ----------
 
 from gluonts.time_feature import get_lags_for_frequency
 
 lags_sequence = get_lags_for_frequency(freq)
 print(lags_sequence)
 
-# COMMAND ------------
+# COMMAND ----------
 
 from gluonts.time_feature import time_features_from_frequency_str
 
 time_features = time_features_from_frequency_str(freq)
 print(time_features)
 
-# COMMAND ------------
+# COMMAND ----------
 
 from transformers import TimeSeriesTransformerConfig, TimeSeriesTransformerForPrediction
 
@@ -82,7 +86,7 @@ config = TimeSeriesTransformerConfig(
 
 model = TimeSeriesTransformerForPrediction(config)
 
-# COMMAND ------------
+# COMMAND ----------
 
 from gluonts.time_feature import time_features_from_frequency_str, TimeFeature, get_lags_for_frequency
 from gluonts.dataset.field_names import FieldName
@@ -104,7 +108,7 @@ from gluonts.transform import (
     RenameFields,
 )
 
-# COMMAND ------------
+# COMMAND ----------
 
 from transformers import PretrainedConfig
 
@@ -193,7 +197,7 @@ def create_transformation(freq: str, config: PretrainedConfig) -> Transformation
         ]
     )
 
-# COMMAND ------------
+# COMMAND ----------
 
 from gluonts.transform.sampler import InstanceSampler
 from typing import Optional
@@ -226,7 +230,7 @@ def create_instance_splitter(config: PretrainedConfig, mode: str, train_sampler:
         ],
     )
 
-# COMMAND ------------
+# COMMAND ----------
 
 from gluonts.itertools import Cyclic, IterableSlice, PseudoShuffled
 from gluonts.torch.util import IterableDataset
@@ -292,7 +296,7 @@ def create_train_dataloader(
         num_batches_per_epoch,
     )
 
-# COMMAND ------------
+# COMMAND ----------
 
 def create_test_dataloader(
     config: PretrainedConfig,
@@ -325,7 +329,7 @@ def create_test_dataloader(
     # This returns a Dataloader which will go over the dataset once.
     return DataLoader(IterableDataset(testing_instances), batch_size=batch_size, **kwargs)
 
-# COMMAND ------------
+# COMMAND ----------
 
 train_dataloader = create_train_dataloader(
     config=config, 
@@ -342,7 +346,13 @@ test_dataloader = create_test_dataloader(
     batch_size=64,
 )
 
-# COMMAND ------------
+# COMMAND ----------
+
+batch = next(iter(train_dataloader))
+for k,v in batch.items():
+  print(k,v.shape, v.type())
+
+# COMMAND ----------
 
 # perform forward pass
 outputs = model(
@@ -357,7 +367,7 @@ outputs = model(
     output_hidden_states=True
 )
 
-# COMMAND ------------
+# COMMAND ----------
 
 from accelerate import Accelerator
 from torch.optim import Adam
@@ -372,51 +382,57 @@ model, optimizer, train_dataloader = accelerator.prepare(
     model, optimizer, train_dataloader, 
 )
 
-for epoch in range(40):
-    model.train()
-    for batch in train_dataloader:
-        optimizer.zero_grad()
-        outputs = model(
-            static_categorical_features=batch["static_categorical_features"].to(device),
-            static_real_features=batch["static_real_features"].to(device),
-            past_time_features=batch["past_time_features"].to(device),
-            past_values=batch["past_values"].to(device),
-            future_time_features=batch["future_time_features"].to(device),
-            future_values=batch["future_values"].to(device),
-            past_observed_mask=batch["past_observed_mask"].to(device),
-            future_observed_mask=batch["future_observed_mask"].to(device),
-        )
-        loss = outputs.loss
+max_epochs = 20
 
-        # Backpropagation
-        accelerator.backward(loss)
-        optimizer.step()
+for epoch in range(max_epochs):
+  print(f"Epoch {epoch} of {max_epochs}")
+  model.train()
+  idx = 0
+  for batch in train_dataloader:
+    print(f"Training for batch {idx}")
+    optimizer.zero_grad()
+    outputs = model(
+      static_categorical_features=batch["static_categorical_features"].to(device),
+      static_real_features=batch["static_real_features"].to(device),
+      past_time_features=batch["past_time_features"].to(device),
+      past_values=batch["past_values"].to(device),
+      future_time_features=batch["future_time_features"].to(device),
+      future_values=batch["future_values"].to(device),
+      past_observed_mask=batch["past_observed_mask"].to(device),
+      future_observed_mask=batch["future_observed_mask"].to(device),
+    )
+    loss = outputs.loss
 
-        print(loss.item())
+    # Backpropagation
+    accelerator.backward(loss)
+    optimizer.step()
 
-# COMMAND ------------
+    print(f"Loss: {loss.item()}")
+    idx += 1
+
+# COMMAND ----------
 
 model.eval()
 
 forecasts = []
 
 for batch in test_dataloader:
-    outputs = model.generate(
-        static_categorical_features=batch["static_categorical_features"].to(device),
-        static_real_features=batch["static_real_features"].to(device),
-        past_time_features=batch["past_time_features"].to(device),
-        past_values=batch["past_values"].to(device),
-        future_time_features=batch["future_time_features"].to(device),
-        past_observed_mask=batch["past_observed_mask"].to(device),
-    )
-    forecasts.append(outputs.sequences.cpu().numpy())
+  outputs = model.generate(
+    static_categorical_features=batch["static_categorical_features"].to(device),
+    static_real_features=batch["static_real_features"].to(device),
+    past_time_features=batch["past_time_features"].to(device),
+    past_values=batch["past_values"].to(device),
+    future_time_features=batch["future_time_features"].to(device),
+    past_observed_mask=batch["past_observed_mask"].to(device),
+  )
+  forecasts.append(outputs.sequences.cpu().numpy())
 
-# COMMAND ------------
+# COMMAND ----------
 
 forecasts = np.vstack(forecasts)
 print(forecasts.shape)
 
-# COMMAND ------------
+# COMMAND ----------
 
 from evaluate import load
 from gluonts.time_feature import get_seasonality
@@ -447,14 +463,14 @@ for item_id, ts in enumerate(test_dataset):
 print(f"MASE: {np.mean(metric)}")
 print(f"sMAPE: {np.mean(smape_metrics)}")
 
-# COMMAND ------------
+# COMMAND ----------
 
 plt.scatter(mase_metrics, smape_metrics, alpha=0.3)
 plt.xlabel("MASE")
 plt.ylabel("sMAPE")
 plt.show()
 
-# COMMAND ------------
+# COMMAND ----------
 
 import matplotlib.dates as mdates
 
@@ -494,6 +510,6 @@ def plot(ts_index):
     plt.legend()
     plt.show()
 
-# COMMAND ------------
+# COMMAND ----------
 
 plot(334)
